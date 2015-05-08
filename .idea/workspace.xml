@@ -4,7 +4,7 @@
     <list default="true" id="30fe0730-fe49-472a-b4e0-49784c549ce1" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Gemfile" afterPath="$PROJECT_DIR$/Gemfile" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/logstash-filter-sphinx.gemspec" afterPath="$PROJECT_DIR$/logstash-filter-sphinx.gemspec" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/logstash/filters/sphinx.rb" afterPath="$PROJECT_DIR$/lib/logstash/filters/sphinx.rb" />
     </list>
     <ignored path="logstash-filter-sphinx.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -45,8 +45,8 @@
       <file leaf-file-name="logstash-filter-sphinx.gemspec" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/logstash-filter-sphinx.gemspec">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.38672987" vertical-offset="0" max-vertical-offset="1055">
-              <caret line="24" column="2" selection-start-line="24" selection-start-column="2" selection-end-line="24" selection-end-column="2" />
+            <state vertical-scroll-proportion="0.032227486" vertical-offset="0" max-vertical-offset="1055">
+              <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
               <folding />
             </state>
           </provider>
@@ -55,8 +55,8 @@
       <file leaf-file-name="sphinx.rb" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/logstash/filters/sphinx.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="7853" max-vertical-offset="8908">
-              <caret line="491" column="29" selection-start-line="491" selection-start-column="29" selection-end-line="491" selection-end-column="29" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="6323" max-vertical-offset="8925">
+              <caret line="457" column="7" selection-start-line="457" selection-start-column="7" selection-end-line="457" selection-end-column="7" />
               <folding />
             </state>
           </provider>
@@ -101,10 +101,10 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="C:/logstash-1.5.0-rc3/lib/logstash/runner.rb" />
-        <option value="$PROJECT_DIR$/lib/logstash/filters/sphinx.rb" />
         <option value="$PROJECT_DIR$/Gemfile.lock" />
-        <option value="$PROJECT_DIR$/logstash-filter-sphinx.gemspec" />
         <option value="$PROJECT_DIR$/Gemfile" />
+        <option value="$PROJECT_DIR$/lib/logstash/filters/sphinx.rb" />
+        <option value="$PROJECT_DIR$/logstash-filter-sphinx.gemspec" />
       </list>
     </option>
   </component>
@@ -444,8 +444,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/logstash/filters/sphinx.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="7853" max-vertical-offset="8908">
-          <caret line="491" column="29" selection-start-line="491" selection-start-column="29" selection-end-line="491" selection-end-column="29" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="6323" max-vertical-offset="8925">
+          <caret line="457" column="7" selection-start-line="457" selection-start-column="7" selection-end-line="457" selection-end-column="7" />
           <folding />
         </state>
       </provider>
@@ -460,8 +460,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/logstash-filter-sphinx.gemspec">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.38672987" vertical-offset="0" max-vertical-offset="1055">
-          <caret line="24" column="2" selection-start-line="24" selection-start-column="2" selection-end-line="24" selection-end-column="2" />
+        <state vertical-scroll-proportion="0.032227486" vertical-offset="0" max-vertical-offset="1055">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
           <folding />
         </state>
       </provider>

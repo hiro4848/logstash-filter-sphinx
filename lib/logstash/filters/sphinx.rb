@@ -431,7 +431,7 @@ class SphinxWindowsSysmonEventFilter < SphinxWindowsEventFilter
       return event['Hash'].downcase
 
     elsif event['Hashes']
-      return event['Hashes'][4,32] #NOTE  hardcoded for MD5
+      return event['Hashes'][4,32].downcase #NOTE  hardcoded for MD5
     end
 
     nil
@@ -459,7 +459,8 @@ class LogStash::Filters::Sphinx < LogStash::Filters::Base
   # }
   #
   config_name "sphinx"
-  
+  milestone 1
+
   config :pg_host, :required => false, :default => 'localhost'
   config :pg_port, :required => false, :default => 5432
   config :pg_user, :required => true
