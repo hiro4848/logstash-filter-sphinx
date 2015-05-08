@@ -1,0 +1,30 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="sphinx" type="RubyRunConfigurationType" factoryName="Ruby">
+    <module name="logstash-filter-sphinx" />
+    <RUBY_RUN_CONFIG NAME="RUBY_ARGS" VALUE="-e $stdout.sync=true;$stderr.sync=true;load($0=ARGV.shift)" />
+    <RUBY_RUN_CONFIG NAME="WORK DIR" VALUE="C:/logstash-1.5.0-rc3/bin" />
+    <RUBY_RUN_CONFIG NAME="SHOULD_USE_SDK" VALUE="false" />
+    <RUBY_RUN_CONFIG NAME="ALTERN_SDK_NAME" VALUE="" />
+    <RUBY_RUN_CONFIG NAME="myPassParentEnvs" VALUE="true" />
+    <envs>
+      <env name="RUBYLIB" value="C:\logstash-1.5.0-rc3\lib" />
+      <env name="JRUBY_BIN" value="C:\logstash-1.5.0-rc3\vendor\jruby\bin\jruby" />
+      <env name="VENDORED_JRUBY" value="1" />
+      <env name="SCRIPT_DIR" value="C:\logstash-1.5.0-rc3\bin\" />
+      <env name="LS_HOME" value="C:\logstash-1.5.0-rc3" />
+      <env name="LS_MAX_MEM" value="1g" />
+      <env name="LS_MIN_MEM" value="256m" />
+    </envs>
+    <EXTENSION ID="BundlerRunConfigurationExtension" bundleExecEnabled="false" />
+    <EXTENSION ID="JRubyRunConfigurationExtension" NailgunExecEnabled="false" />
+    <EXTENSION ID="RubyCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" track_test_folders="true" runner="rcov" />
+    <EXTENSION ID="org.jetbrains.plugins.ruby.motion.run.MotionSimulatorRunExtension" />
+    <RUBY_RUN_CONFIG NAME="SCRIPT_PATH" VALUE="C:/logstash-1.5.0-rc3/lib/logstash/runner.rb" />
+    <RUBY_RUN_CONFIG NAME="SCRIPT_ARGS" VALUE="agent -f ..\logstash.conf -p C:\Users\tak\RubymineProjects\logstash-filter-sphinx\lib" />
+    <RunnerSettings RunnerId="RubyDebugRunner" />
+    <RunnerSettings RunnerId="RubyRunner" />
+    <ConfigurationWrapper RunnerId="RubyDebugRunner" />
+    <ConfigurationWrapper RunnerId="RubyRunner" />
+    <method />
+  </configuration>
+</component>
