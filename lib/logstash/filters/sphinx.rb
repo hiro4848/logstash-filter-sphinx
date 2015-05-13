@@ -13,24 +13,64 @@ class SphinxDataAccessor
 
   def initialize(config)
 
-    @redis = Redis.new(:host => config["redis_host"], :port => config["redis_port"], :db => config["redis_db"])
+    @redis_user_conn = Redis.new(:host => config["redis_host"], :port => config["redis_port"], :db => config["redis_user_db"])
+    @redis_record_conn = Redis.new(:host => config["redis_host"], :port => config["redis_port"], :db => config["redis_record_db"])
+    @redis_host_conn = Redis.new(:host => config["redis_host"], :port => config["redis_port"], :db => config["redis_host_db"])
     @pg_conn = ConnectionPool::Wrapper.new(size: 8, timeout: 3) { PG::connect(:host => config["pg_host"], :user => config["pg_user"], :password => config["pg_password"], :dbname => config["pg_dbname"]) }
 
   end
 
-  def set_record_in_redis(md5, record)
+  public
+  def get_user(access_id, access_key)
 
+    # sanity check for user inputs
+    if access_id.nil? || access_key.nil?
+      return nil
+    end
+
+    if access_id.strip == '' || access_key == ''
+      return nil
+    end
+
+    # check redis first
+    user = get_user_from_redis(access_id, access_key)
+    return user if user
+
+    user = get_user_from_pg(access_id, access_key)
+
+    if user
+      set_user_in_redis(access_id, access_key, user)
+    end
+
+    return user
+  end
+
+
+  public
+  def add_host(user_id, hostname)
+
+    # check redis cache first
+    host = get_host_from_redis(user_id, hostname)
+    return if host
+
+    # create a host entry if not in the database
     begin
+      host = create_host(user_id, hostname)
+      insert_host_into_pg(host)
 
-      @redis.mapped_hmset(md5, record)
+      set_host_in_redis(user_id, hostname, host)
 
     rescue => e
       puts e.message
+
     end
+
+
 
   end
 
 
+  public
   def get_record(md5)
 
 
@@ -97,12 +137,146 @@ class SphinxDataAccessor
 
   end
 
+  private
+  def redis_host_db_key(user_id, hostname)
+    "#{user_id}-#{hostname}".strip
+  end
 
+  private
+  def get_host_from_redis(user_id, hostname)
+    begin
+
+      key = redis_host_db_key(user_id, hostname)
+
+      host = @redis_host_conn.hgetall(key) #hgetall returns all fields and values of the hash stored at key
+
+      return host if host != {}
+
+    rescue => e
+      puts e.message
+    end
+
+    nil
+  end
+
+  private
+  def create_host(user_id, hostname)
+    {'user_id' => user_id, 'hostname' => hostname}
+  end
+
+  private
+  def set_host_in_redis(user_id, hostname, host)
+    begin
+      key = redis_host_db_key(user_id, hostname)
+      @redis_host_conn.mapped_hmset(key, host)
+    rescue => e
+      puts e.message
+    end
+    nil
+  end
+
+  private
+  def redis_user_db_key(access_id, access_key)
+    "#{access_id}-#{access_key}"
+  end
+
+
+  private
+  def get_user_from_redis(access_id, access_key)
+    key = redis_user_db_key(access_id, access_key)
+
+    begin
+
+      user = @redis_user_conn.hgetall(key) #hgetall returns all fields and values of the hash stored at key
+      return user if user != {}
+
+    rescue => e
+      puts e.message
+    end
+
+    nil
+  end
+
+
+
+
+
+  private
+  def get_user_from_pg(access_id, access_key)
+
+    begin
+      #TODO
+      #      @pg_conn.prepare('stmt1', "SELECT * FROM reference_hashes WHERE md5 = $1 LIMIT 1")
+      #      result = @pg_conn.exec_prepared('stmt1', [md5])
+      result = @pg_conn.exec("SELECT users.* from users, data_forwarder_keys WHERE users.id = data_forwarder_keys.user_id AND access_id = '#{access_id}' AND access_key = '#{access_key}' LIMIT 1")
+      row = result.first
+
+      if row
+        user = {
+            "email" => row['email'],
+            'id' => row["id"],
+        }
+        return user
+      end
+
+      return nil
+
+    rescue => e
+      puts e.message
+    end
+
+    nil
+  end
+
+  private
+  def set_user_in_redis(access_id, access_key, user)
+    key = redis_user_db_key(access_id, access_key)
+
+    begin
+      @redis_user_conn.mapped_hmset(key, user)
+    rescue => e
+      puts e.message
+    end
+    nil
+  end
+
+  private
+  def create_new_host(user_id, hostname)
+    {"user_id" => user_id, "hostname" => hostname}
+  end
+
+  def insert_host_into_pg(host)
+    timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+    sql = "INSERT INTO hosts (user_id, hostname, created_at, updated_at) VALUES ('#{host['user_id']}', '#{host['hostname']}', '#{timestamp}', '#{timestamp}')"
+    result = @pg_conn.exec(sql)
+
+    nil
+  end
+
+
+
+  private
+  def set_record_in_redis(md5, record)
+
+    begin
+
+      @redis_record_conn.mapped_hmset(md5, record)
+
+    rescue => e
+      puts e.message
+    end
+
+  end
+
+
+
+  private
   def create_new_record(md5)
 #    {"md5" => md5, "wtf_timestamp" => @wtf_ts}
     {"md5" => md5}
   end
 
+  private
   def insert_record_into_pg(record)
 
     md5 = record["md5"]
@@ -120,11 +294,12 @@ class SphinxDataAccessor
   end
 
 
+  private
   def get_record_from_redis(md5)
 
     begin
 
-      record = @redis.hgetall(md5) #hgetall returns all fields and values of the hash stored at key
+      record = @redis_record_conn.hgetall(md5) #hgetall returns all fields and values of the hash stored at key
 
       return record if record != {}
 
@@ -135,7 +310,7 @@ class SphinxDataAccessor
     nil
   end
 
-
+  private
   def get_record_from_pg(md5)
 
     begin
@@ -246,10 +421,6 @@ class SphinxEventFilter
     raise "Not implemented"
   end
 
-  def remove_access_token(event)
-
-    event.remove('SphinxAccessToken')
-  end
 
   def finalize(event)
     event['SphinxFilterVersion'] = self.class::SPHINX_FILTER_VERSION
@@ -276,7 +447,6 @@ class SphinxWindowsEventFilter < SphinxEventFilter
 
   def apply(event)
 
-    remove_access_token(event)
 
   end
 end
@@ -286,9 +456,6 @@ class SphinxWindowsSysmonEventFilter < SphinxWindowsEventFilter
   SPHINX_FILTER_NAME = 'SysmonEventFilter'
 
   def apply(event)
-
-    # remove access token first
-    remove_access_token(event)
 
 
     case event['EventID'].to_i
@@ -459,7 +626,6 @@ class LogStash::Filters::Sphinx < LogStash::Filters::Base
   # }
   #
   config_name "sphinx"
-  milestone 1
 
   config :pg_host, :required => false, :default => 'localhost'
   config :pg_port, :required => false, :default => 5432
@@ -469,15 +635,19 @@ class LogStash::Filters::Sphinx < LogStash::Filters::Base
 
   config :redis_host, :required => false, :default => 'localhost'
   config :redis_port, :required => false, :default => 6379
-  config :redis_db, :required => true
+  config :redis_user_db, :required => false, :default => 1
+  config :redis_host_db, :required => false, :default => 2
+  config :redis_record_db, :required => false, :default => 3
 
 
 
   public
   def register
 
+    @data_accessor = SphinxDataAccessor.new(@config)
     @event_filter_factory = SphinxEventFilterFactory.new(@config)
     @logger.debug("Registered sphinx plugin", :type => @type, :config => @config)
+
 
   end # def register
 
@@ -490,7 +660,27 @@ class LogStash::Filters::Sphinx < LogStash::Filters::Base
     begin
 
       # drop nxlog related events
-      drop_nxlog_event(event)
+      if is_nxlog_event?(event)
+        event.cancel
+        return
+      end
+
+
+      # auth key check
+      user = get_user(event)
+      if user
+        event['SphinxUserId'] = user["id"]
+      else
+        event.cancel
+        return
+      end
+
+      # insert host to database
+      hostname = event["Hostname"]
+      add_host_to_db(user['id'], hostname)
+
+      # remove access_key
+      remove_data_forwarder_credential(event)
 
       # get event filter
       event_filter = @event_filter_factory.get_filter(event)
@@ -507,13 +697,29 @@ class LogStash::Filters::Sphinx < LogStash::Filters::Base
     filter_matched(event)
   end # def filter
 
-
   private
-  def drop_nxlog_event(event)
-    if event['SourceName'] == 'nxlog-ce'
-      event.cancel
-    end
+  def add_host_to_db(user_id, hostname)
+    @data_accessor.add_host(user_id, hostname)
+    nil
   end
 
+  private
+  def get_user(event)
+    access_id = event['SphinxAccessId']
+    access_key = event['SphinxAccessKey']
+    return @data_accessor.get_user(access_id, access_key)
+  end
+
+
+  private
+  def is_nxlog_event?(event)
+    event['SourceName'] == 'nxlog-ce'
+  end
+
+  private
+  def remove_data_forwarder_credential(event)
+    event.remove('SphinxAccessId')
+    event.remove('SphinxAccessKey')
+  end
 
 end # class LogStash::Filters::Example
