@@ -403,6 +403,18 @@ class SphinxEventFilterFactory
 
 end
 
+class SphinxEventType
+
+  PROCESS_CREATION = 'ProcessCreation'
+  FILE_CREATION_TIME_CHANGE = 'FileCreationTimeChange'
+  NETWORK_CONNECTION = 'NetworkConnection'
+  SERVICE_STATE_CHANGE = 'ServiceStateChange'
+  PROCESS_TERMINATION = 'ProcessTermination'
+  DRIVER_LOAD = 'DriverLoad'
+  IMAGE_LOAD = 'ImageLoad'
+  REMOTE_THREAD_CREATION = 'RemoteThreadCreation'
+
+end
 
 
 class SphinxEventFilter
@@ -462,34 +474,52 @@ class SphinxWindowsSysmonEventFilter < SphinxWindowsEventFilter
 
       # process creation
       when 1
+        set_document_id(event)
+        set_document_type(event, SphinxEventType::PROCESS_CREATION)
         add_process_name(event)
         add_reputation_data(event)
 
+
       # file creation
       when 2
+        set_document_type(event, SphinxEventType::FILE_CREATION_TIME_CHANGE)
+        set_document_parent(event)
         add_process_name(event)
         add_target_file_name(event)
         add_reputation_data(event)
 
       # network conn
       when 3
+        set_document_type(event, SphinxEventType::NETWORK_CONNECTION)
+        set_document_parent(event)
         extend_ipaddress(event)
         add_process_name(event)
 
+      # process termination
+      when 5
+        set_document_type(event, SphinxEventType::PROCESS_TERMINATION)
+        set_document_parent(event)
+
       # driver load
       when 6
+        set_document_type(event, SphinxEventType::DRIVER_LOAD)
+        set_document_parent(event)
         add_file_name(event)
         add_reputation_data(event)
 
 
       # dll load
       when 7
+        set_document_type(event, SphinxEventType::IMAGE_LOAD)        
+        set_document_parent(event)
         add_process_name(event)
         add_file_name(event)
         add_reputation_data(event)
 
       # remote thread
       when 8
+        set_document_type(event, SphinxEventType::REMOTE_THREAD_CREATION)
+        set_document_parent(event)
         #TODO
 
     end
@@ -498,6 +528,17 @@ class SphinxWindowsSysmonEventFilter < SphinxWindowsEventFilter
 
   end
 
+  def set_document_id(event)
+    event['_id'] = event['ProcessGuid']
+  end
+
+  def set_document_type(event, type)
+    event['type'] = type
+  end
+
+  def set_document_parent(event)
+    event['parent'] = event['ProcessGuid']
+  end
 
   def extend_ipaddress(event)
 
